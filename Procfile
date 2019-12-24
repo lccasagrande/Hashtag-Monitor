@@ -1,1 +1,1 @@
-web: gunicorn hashtag_monitor.wsgi  --log-file -
+web: gunicorn hashtag_monitor.wsgi2  --log-file -
