@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['hashtag_mon.herokuapp.com']
+ALLOWED_HOSTS = ['hashtag-mon.herokuapp.com']
 LATEST_TWEETS_NB = 100
 TWEETER_SYNC_GROUP_NAME = 'tweeter_sync'
 TWEETER_SYNC_MINUTES = 5
