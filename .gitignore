@@ -1,4 +1,5 @@
 hashtag_monitor/apps/monitor/migrations/*
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
