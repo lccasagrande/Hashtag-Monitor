@@ -47,7 +47,7 @@ ASGI_APPLICATION = 'hashtag_monitor.routing.application'
 # Application definition
 
 INSTALLED_APPS = [
-    'hashtag_monitor.apps.monitor',
+    'hashtag_monitor.apps.monitor.apps.MonitorConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
