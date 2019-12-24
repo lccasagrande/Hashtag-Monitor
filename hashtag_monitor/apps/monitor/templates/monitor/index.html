@@ -694,11 +694,9 @@
     }
 
     function plot_tweets_per_day(tweets_per_day) {
-      console.log(tweets_per_day)
       var labels = $.map(tweets_per_day, function (value, key) {
         return key
       });
-      console.log(labels)
       //line
       var datasets = [];
       for (h in tweets_per_day) {
@@ -766,7 +764,7 @@
 
     function connect() {
 
-      var ws_url = 'ws://' + window.location.host + '/ws/sync/';
+      var ws_url = 'wss://' + window.location.host + '/ws/sync/';
       var socket = new WebSocket(ws_url);
 
       socket.onmessage = function (event) {
