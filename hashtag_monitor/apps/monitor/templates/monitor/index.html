@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% load custom_tags %}
+  {% load static %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Material Design Bootstrap</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link href="{% static 'monitor/css/bootstrap.css' %}" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="{% static 'monitor/css/mdb.css' %}" rel="stylesheet">
+  <!-- Your custom styles (optional) -->
+  <link href="{% static 'monitor/css/style.css' %}" rel="stylesheet">
+  <style>
+    <style>.map-container {
+      overflow: hidden;
+      padding-bottom: 56.25%;
+      position: relative;
+      height: 0;
+    }
+
+    .map-container iframe {
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      position: absolute;
+    }
+  </style>
+</head>
+
+<body class="grey lighten-3">
+
+  <!--Main Navigation-->
+  <header>
+
+    <!-- Navbar -->
+    <nav class="navbar fixed-top navbar-expand-lg navbar-dark blue-gradient  scrolling-navbar">
+      <div class="container-fluid">
+
+        <!-- Brand -->
+        <a class="navbar-brand" href="#"><i class="fab fa-twitter" aria-hidden="true"></i> Hashtag Monitor</a>
+        <!-- Brand -->
+
+        <!-- Collapse -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Links -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+          <!-- Left -->
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link waves-effect" href="#">Dashboard
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
+          </ul>
+
+          <!-- Right -->
+          <ul class="navbar-nav nav-flex-icons">
+            <li class="nav-item">
+              <a href="https://github.com/lccasagrande/Hashtag-Monitor" class="nav-link waves-effect" target="_blank">
+                <i class="fab fa-github mr-2"></i>
+              </a>
+            </li>
+          </ul>
+
+        </div>
+
+      </div>
+    </nav>
+    <!-- Navbar -->
+
+  </header>
+  <!--Main Navigation-->
+
+  <!--Main layout-->
+  <main class="pt-5 mx-lg-5">
+    <div class="container-fluid mt-5">
+      <!--Grid row-->
+
+      <!-- Heading -->
+      <div class="card mb-4 wow fadeIn">
+
+        <!--Card content-->
+        <div class="card-body d-sm-flex ">
+
+          <h4 class="mt-2 mb-0">Filters:</h4>
+
+          <div class='form-row ml-3'>
+            <div class='col-auto'>
+              <div class="md-form my-1 pb-1 input-group">
+                <div class="input-group-prepend">
+                  <span class='input-group-text md-addon pb-0'><i class="fas fa-hashtag green-text "></i></span>
+                </div>
+                <select class="browser-default custom-select" name='selected_hashtag' id='filter_hashtag_id'
+                  onChange="filterHashtag(this.value)">
+                  <option selected value="">All Hashtags</option>
+                  {% for hashtag in hashtag_list %}
+                  <option value={{hashtag.name}}> {{hashtag.name}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <!-- Heading -->
+
+      <!-- Summary -->
+      <div class="row">
+
+        <!--Grid column-->
+        <div class="col-lg-4 col-md-4 mb-4">
+
+          <div class="media white z-depth-1 rounded">
+            <i class="fab fa-twitter fa-lg blue z-depth-1 p-4 rounded-left text-white mr-3"></i>
+            <div class="media-body p-1">
+              <p class="text-uppercase text-muted mb-1"><small>Tweets</small></p>
+              <h5 class="font-weight-bold mb-0" id="summary_tweets_count_id">
+                {% if summary %}{{ summary.tweets_count }}{% else %}0{% endif %}</h5>
+            </div>
+          </div>
+
+
+        </div>
+        <!--Grid column-->
+
+        <!--Grid column-->
+        <div class="col-lg-4 col-md-4 mb-4">
+
+          <div class="media white z-depth-1 rounded">
+            <i class="fas fa-retweet fa-lg deep-purple z-depth-1 p-4 rounded-left text-white mr-3"></i>
+            <div class="media-body p-1">
+              <p class="text-uppercase text-muted mb-1"><small>Retweets</small></p>
+              <h5 class="font-weight-bold mb-0" id="summary_retweet_count_id">
+                {% if summary %}{{ summary.retweet_count }}{% else %}0{% endif %} </h5>
+            </div>
+          </div>
+
+
+        </div>
+        <!--Grid column-->
+
+        <!--Grid column-->
+        <div class="col-lg-4 col-md-4 mb-4">
+
+          <div class="media white z-depth-1 rounded">
+            <i class="fas fa-users fa-lg teal z-depth-1 p-4 rounded-left text-white mr-3"></i>
+            <div class="media-body p-1">
+              <p class="text-uppercase text-muted mb-1"><small>talking</small></p>
+              <h5 class="font-weight-bold mb-0" id="summary_talking_id">
+                {% if summary %}{{ summary.users }}{% else %}0{% endif %} </h5>
+            </div>
+          </div>
+
+        </div>
+        <!--Grid column-->
+
+      </div>
+      <!-- Summary -->
+
+      <div class="row wow fadeIn">
+
+        <!--Grid column (Hashtags)-->
+        <div class="col-md-12 col-lg-3 col-sm-12 mb-4">
+
+          <!--Card-->
+          <div class="card ">
+
+            <!--Card header-->
+            <h4 class="rounded-top card-header dark-grey-text text-center font-weight-bold">
+              Hashtags
+            </h4>
+            <div class='tweets-container'>
+
+              <form action="{% url 'monitor:hashtag_create' %}" method="post">
+                <div class="md-form mx-3 my-2">
+                  {% csrf_token %}
+                  <label for="{{ hashtag_form.name.id_for_label }}">{{ hashtag_form.name.label }}</label>
+                  <input type="text" name="{{ hashtag_form.name.name }}" id="{{ hashtag_form.name.auto_id }}"
+                    class="form-control {% if hashtag_form.errors.name or twitter_error %}is_invalid{% endif %}">
+                  {% if hashtag_form.errors.name or twitter_error %}
+                  <div class="invalid-feedback" style="display: block">
+                    {{ twitter_error }}
+                    {% for err in hashtag_form.name.errors %}
+                    {{ err }}
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                  <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
+                    tabindex="-1" />
+                </div>
+              </form>
+              <!--/.Card header-->
+
+              <!--Card Body-->
+              <div class="card-body lighten-5 rounded-bottom py-1">
+                <div class="list-group list-group-flush px-2" id='hashtag_list_div'>
+                  {% if hashtag_list %}
+                  {% for hashtag in hashtag_list %}
+                  <div class="list-group-item d-flex justify-content-between align-items-center pl-1 pr-2 py-2">
+                    {{ hashtag.name }}
+                    <a class="far fa-trash-alt close" href="{% url 'monitor:hashtag_delete' hashtag.name %}"></a>
+                  </div>
+                  {% endfor %}
+                  {% else %}
+                  <p> No hashtags being monitored .</p>
+                  {% endif %}
+                </div>
+
+                <!-- List group links -->
+              </div>
+            </div>
+            <!--/.Card Body -->
+
+
+          </div>
+          <!--/.Card-->
+
+        </div>
+        <!--./Grid column (Hashtags)-->
+
+        <!--Grid column (Publications)-->
+        <div class="col-md-12 col-lg-9 col-sm-12 mb-4">
+
+          <!--Card-->
+          <div class="card ">
+
+            <!--Card header-->
+            <h4 class="rounded-top card-header cloudy-knoxville-gradient dark-grey-text text-center font-weight-bold">
+              Latests tweets
+            </h4>
+            <!--Grid column-->
+
+            <!--/.Card header-->
+
+            <!--Card Body-->
+            <div class="card-body lighten-5 rounded-bottom py-1 mt-1 tweets-container">
+              <!-- List group links -->
+              <div class="list-group list-group-flush px-2 py-2" id='tweet_container_id'>
+                {% if tweet_list %}
+                {% for tweet in tweet_list %}
+
+                <div class="list-group-item justify-content-between align-items-center ml-2 mr-2">
+                  <div class='row'>
+                    <img class="rounded-circle md-avatar z-depth-1-half mb-1 mx-1"
+                      src="{{ tweet.author.profile_image }}" alt="Avatar">
+                    <div class="pl-3">
+                      <p class="font-weight-bold dark-grey-text mb-n1 mr-1">
+                        {{ tweet.author.name }}
+                        {% for ht in tweet.hashtags|slice:":5" %}
+                        <span class="ml-1 badge"  style="background-color: {{ ht.color }} !important"> {{ ht.name }} </span>
+                        {% endfor %}
+                      </p>
+                      <div class='pt-2'>
+                        <a href="https://twitter.com/{{ tweet.author.screen_name }}" target="_blank"> <small
+                            class="green-text"><i class="fas fa-at"></i> {{ tweet.author.screen_name }}</small> </a>
+                        <small class="grey-text px-2" data-toggle="tooltip" title="Following"><i
+                            class="fas fa-user-friends"></i> {{ tweet.author.friends_count }} </small>
+                        <small class="grey-text px-2" data-toggle="tooltip" title="Followers"><i
+                            class="fas fa-fire"></i> {{ tweet.author.followers_count }}
+                        </small>
+                        <small class="grey-text px-2" data-toggle="tooltip" title="Retweets"><i
+                            class="fas fa-retweet"></i> {{ tweet.retweet_count }} </small>
+                      </div>
+
+                    </div>
+                    <div class='ml-auto pr-2'>
+
+                      <small class='text-muted '>
+                        <i class="far fa-calendar-alt green-text"></i>
+                        {{ tweet.created_at }}
+                      </small>
+                    </div>
+                  </div>
+
+                  <!-- Added text -->
+
+                  <div class='row'>
+                    {% if tweet.url %}
+                    <a href="{{tweet.url}}" target="_blank" class='black-text'>"{{ tweet.text }}"</a>
+                    {% else %}
+                    "{{ tweet.text }}"
+                    {% endif %}
+                  </div>
+
+
+                  <!-- Quoted -->
+                  {% if tweet.quoted_tweet %}
+                  <div class='row mt-3 ml-5 mr-1 white z-depth-1 rounded'>
+                    <img class="rounded-circle md-avatar z-depth-1-half mx-2 my-2"
+                      src="{{ tweet.quoted_tweet.author.profile_image }}" alt="Avatar">
+                    <div class="pl-1 mx-2 my-2">
+                      <p class="font-weight-bold dark-grey-text mb-n1 mr-1">
+                        {{ tweet.quoted_tweet.author.name }}
+                        {% for ht in tweet.quoted_tweet.hashtags.all|slice:":5" %}
+                        <span class="ml-1 badge" style="background-color: {{ ht.color }} !important"> {{ ht.name }}
+                        </span>
+                        {% endfor %}
+                      </p>
+                      <div class='pt-2'>
+                        <a href="https://twitter.com/{{ tweet.quoted_tweet.author.screen_name }}" target="_blank">
+                          <small class="green-text"><i class="fas fa-at"></i>
+                            {{ tweet.quoted_tweet.author.screen_name }}</small> </a>
+                        <small class="grey-text px-2" data-toggle="tooltip" title="Following"><i
+                            class="fas fa-user-friends"></i> {{ tweet.quoted_tweet.author.friends_count }} </small>
+                        <small class="grey-text px-2" data-toggle="tooltip" title="Followers"><i
+                            class="fas fa-fire"></i> {{ tweet.quoted_tweet.author.followers_count }}
+                        </small>
+                        <small class="grey-text px-2" data-toggle="tooltip" title="Retweets"><i
+                            class="fas fa-retweet"></i> {{ tweet.quoted_tweet.retweet_count }} </small>
+                      </div>
+
+                    </div>
+
+                    <div class='ml-auto pr-2'>
+                      <small class='text-muted ml-auto pr-2'>
+                        <i class="far fa-calendar-alt green-text"></i>
+                        {{ tweet.quoted_tweet.created_at|date:'d/m/Y' }}
+                      </small>
+                    </div>
+                    <!-- Added text -->
+                    <div class='row ml-3 mr-1 py-2'> "{{ tweet.quoted_tweet.text }}"</div>
+                  </div>
+                  {% endif %}
+
+                  <!-- Quoted -->
+                </div>
+
+                {% endfor %}
+                {% else %}
+                <p> No tweets to show.</p>
+                {% endif %}
+
+              </div>
+              <!-- List group links -->
+
+            </div>
+            <!--/.Card Body -->
+
+            <!--/.Card Body -->
+          </div>
+          <!--/.Card-->
+
+        </div>
+        <!--./Grid column (Publications)-->
+
+      </div>
+      <!--Grid row-->
+
+
+      <!--Grid row-->
+      <div class="row wow fadeIn">
+
+        <!--Grid column-->
+        <div class="col-md-9 mb-4">
+
+          <!--Card-->
+          <div class="card">
+
+            <!--Card header-->
+            <h5 class="rounded-top card-header cloudy-knoxville-gradient dark-grey-text text-center font-weight-bold">
+              # Tweets per Hashtag
+            </h5>
+            <!--Card header-->
+
+            <!--Card content-->
+            <div class="card-body tweets-charts">
+
+              {% if not tweets_per_hashtag %}
+              <p> No tweets to show.</p>
+              {% else %}
+              <canvas id="tweets_per_hashtag_chart"></canvas>
+              {% endif %}
+            </div>
+
+          </div>
+          <!--/.Card-->
+
+        </div>
+        <!--Grid column-->
+
+        <!--Grid column-->
+        <div class="col-md-3 mb-4">
+
+          <!--Card-->
+          <div class="card mb-4">
+
+            <!--Card header-->
+            <h5 class="rounded-top card-header cloudy-knoxville-gradient dark-grey-text text-center font-weight-bold">
+              # Languages
+            </h5>
+            <!--Card header-->
+            <!--Card content-->
+
+            <div class="card-body tweets-charts">
+              {% if not tweets_per_lang %}
+              <p> No tweets to show.</p>
+              {% else %}
+              <canvas id="tweets_per_lang_chart"></canvas>
+              {% endif %}
+            </div>
+
+          </div>
+          <!--/.Card-->
+
+        </div>
+        <!--Grid column-->
+
+      </div>
+      <!--Grid row-->
+
+
+      <!--Grid row-->
+      <div class="row wow fadeIn">
+
+        <!--Grid column-->
+        <div class="col-lg-12 col-md-12 mb-4">
+
+          <!--Card-->
+          <div class="card tweets-charts">
+
+            <!-- Card header -->
+            <!--Card header-->
+            <h5 class="rounded-top card-header cloudy-knoxville-gradient dark-grey-text text-center font-weight-bold">
+              # Tweets
+            </h5>
+            <!--Card header-->
+
+            <!--Card content-->
+            <div class="card-body">
+
+              {% if not tweets_per_day %}
+              <p> No tweets to show.</p>
+              {% else %}
+              <canvas id="tweets_per_day_chart"></canvas>
+              {% endif %}
+
+            </div>
+
+          </div>
+          <!--/.Card-->
+
+        </div>
+        <!--Grid column-->
+
+      </div>
+      <!--Grid row-->
+
+    </div>
+  </main>
+  <!--Main layout-->
+
+  <!--Footer-->
+  <footer class="page-footer text-center font-small primary-color-dark darken-2 mt-4 wow fadeIn">
+    <!--Copyright-->
+    <div class="footer-copyright py-3">
+      © 2019 Copyright:
+      <a href="{% url 'monitor:index' %}" target="_blank"> Hashtag Monitor </a>
+    </div>
+    <!--/.Copyright-->
+
+  </footer>
+  <!--/.Footer-->
+
+  <!-- SCRIPTS -->
+  <!-- JQuery -->
+  <script type="text/javascript" src="{% static 'monitor/js/jquery-3.4.1.min.js' %}"></script>
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="{% static 'monitor/js/popper.min.js' %}"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="{% static 'monitor/js/bootstrap.min.js' %}"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="{% static 'monitor/js/mdb.min.js' %}"></script>
+  <!-- Initializations -->
+  <script type="text/javascript">
+    // Animations initialization
+    new WOW().init();
+  </script>
+
+
+  <!-- WebSocket-->
+  <script>
+    function updateHashtags(hashtags, selected_hashtag) {
+      $("#hashtag_list_div").empty()
+      $("#filter_hashtag_id").empty()
+      if (selected_hashtag == null){
+        $("#filter_hashtag_id").append('<option selected value="">All Hashtags</option>')
+      }
+      else {
+        $("#filter_hashtag_id").append('<option value="">All Hashtags</option>')
+      }
+      for (var h in hashtags) {
+        var hashtag = hashtags[h];
+        var hashtag_name_utf8 = hashtag.name.replace("#", "%23");
+        var html = `<div class="list-group-item d-flex justify-content-between align-items-center pl-1 pr-2 py-2">
+                      ${hashtag.name}
+                      <a class="far fa-trash-alt close" href="hashtag/delete/${hashtag_name_utf8}"></a>
+                    </div>`;
+        $("#hashtag_list_div").prepend(html);
+        if (selected_hashtag == hashtag.name){
+          $("#filter_hashtag_id").append(`<option selected value=${hashtag.name}>${hashtag.name}</option>`)
+        }
+        else{
+          $("#filter_hashtag_id").append(`<option value=${hashtag.name}>${hashtag.name}</option>`)
+        }
+      }
+      if ($.isEmptyObject(hashtags)) {
+        $("#hashtag_list_div").append("<p>No hashtags being monitored.</p>")
+      }
+    }
+
+    function updateTweets(tweets) {
+      $("#tweet_container_id").empty();
+      for (var t in tweets) {
+        var tweet = tweets[t];
+        var html = "";
+        html +=
+          `<div class="list-group-item justify-content-between align-items-center ml-2 mr-2">
+              <div class='row'>
+                <img class="rounded-circle md-avatar z-depth-1-half mb-1 mx-1" src="${ tweet.author.profile_image }" alt="Avatar">
+                <div class="pl-3">
+                  <p class="font-weight-bold dark-grey-text mb-n1 mr-1">
+                    ${tweet.author.name }`;
+
+        for (ht in tweet.hashtags) {
+          if (ht == 5) {
+            break;
+          }
+          var hashtag = tweet.hashtags[ht];
+          html +=
+            `<span class="ml-1 badge" style="background-color: ${ hashtag.color } !important"> ${ hashtag.name } </span>`;
+        }
+        html +=
+          `</p>
+                  <div class='pt-2'>
+                      <a href="https://twitter.com/${ tweet.author.screen_name }" target="_blank">
+                        <small class="green-text"><i class="fas fa-at"></i> ${tweet.author.screen_name}</small>
+                      </a>
+                      <small class="grey-text px-2" data-toggle="tooltip" title="Following">
+                        <i class="fas fa-user-friends"></i> ${ tweet.author.friends_count }
+                      </small>
+                      <small class="grey-text px-2" data-toggle="tooltip" title="Followers">
+                        <i class="fas fa-fire"></i> ${ tweet.author.followers_count }
+                      </small>
+                      <small class="grey-text px-2" data-toggle="tooltip" title="Retweets">
+                        <i class="fas fa-retweet"></i> ${ tweet.retweet_count }
+                      </small>
+                  </div>
+                </div>
+                <div class='ml-auto pr-2'>
+                  <small class='text-muted '>
+                    <i class="far fa-calendar-alt green-text"></i>
+                      ${ tweet.created_at}
+                  </small>                  
+                </div>
+              </div>
+              <!-- Added text -->
+              <div class='row'> ${ tweet.text } </div>`;
+
+        if (tweet.quoted_tweet) {
+          html +=
+            `<div class='row mt-3 ml-5 mr-1 white z-depth-1 rounded'>
+                  <img class="rounded-circle md-avatar z-depth-1-half mx-2 my-2" src="${ tweet.quoted_tweet.author.profile_image }" alt="Avatar">
+                  <div class="pl-1 mx-2 my-2">
+                    <p class="font-weight-bold dark-grey-text mb-n1 mr-1">
+                      ${ tweet.quoted_tweet.author.name }`;
+
+          for (ht in tweet.quoted_tweet.hashtags) {
+            if (ht == 5) {
+              break;
+            }
+            var hashtag = tweet.quoted_tweet.hashtags[ht]
+            html +=
+              `<span class="ml-1 badge" style="background-color: ${ hashtag.color } !important"> ${ hashtag.name } </span>`;
+          }
+
+          html += `</p>
+                    <div class='pt-2'>
+                      <a href="https://twitter.com/${ tweet.quoted_tweet.author.screen_name }" target="_blank">
+                        <small class="green-text">
+                          <i class="fas fa-at"></i>
+                          ${ tweet.quoted_tweet.author.screen_name }
+                        </small>
+                      </a>
+                      <small class="grey-text px-2" data-toggle="tooltip" title="Following">
+                        <i class="fas fa-user-friends"></i>
+                        ${ tweet.quoted_tweet.author.friends_count }
+                      </small>
+                      <small class="grey-text px-2" data-toggle="tooltip" title="Followers">
+                        <i class="fas fa-fire"></i>
+                        ${ tweet.quoted_tweet.author.followers_count }
+                      </small>
+                      <small class="grey-text px-2" data-toggle="tooltip" title="Retweets">
+                        <i class="fas fa-retweet"></i>
+                        ${ tweet.quoted_tweet.retweet_count }
+                      </small>
+                    </div>
+                  </div>
+                  <div class='ml-auto pr-2'>
+                    <small class='text-muted ml-auto pr-2'>
+                      <i class="far fa-calendar-alt green-text"></i>
+                      ${ tweet.quoted_tweet.created_at}
+                    </small>
+                  </div>
+                  <!-- Added text -->
+                  <div class='row ml-3 mr-1 py-2'> "${ tweet.quoted_tweet.text }"</div>
+              </div>`;
+        }
+        html +=
+          "</div>";
+        $("#tweet_container_id").append(html);
+      }
+      if ($.isEmptyObject(tweets)) {
+        $("#tweet_container_id").append("<p> No tweets to show.</p>")
+      }
+    }
+
+    function updateSummary(summary) {
+      if (summary.hasOwnProperty('tweets_count')) {
+        $("#summary_tweets_count_id").text(summary.tweets_count)
+      }
+      if (summary.hasOwnProperty('retweet_count')) {
+        $("#summary_retweet_count_id").text(summary.retweet_count)
+      }
+      if (summary.hasOwnProperty('users')) {
+        $("#summary_talking_id").text(summary.users)
+      }
+    }
+
+    function filterHashtag(hashtag) {
+      if (hashtag == "") {
+        hashtag = null
+      }
+      var msg = JSON.stringify({
+        content_type: 'filter',
+        content: {
+          'hashtag': hashtag
+        }
+      });
+      socket.send(msg);
+    }
+
+    function plotTweetsPerHashtag(tweets_per_hashtag) {
+      var values = $.map(tweets_per_hashtag, function (value, key) {
+        return value
+      });
+      var labels = $.map(tweets_per_hashtag, function (value, key) {
+        return key
+      });
+      var data = []
+      var backgroundColor = []
+      for (v in values){
+        data.push(values[v]['count'])
+        var color = values[v]['color']
+        if (color.length > 7){
+          color = color.slice(0, 7)
+        }
+        backgroundColor.push(color + "88")
+      }
+      var ctx = document.getElementById("tweets_per_hashtag_chart").getContext('2d');
+      var chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '# Tweets',
+            data: data,
+            backgroundColor: backgroundColor,
+          }]
+        },
+        options: {
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: true
+              }
+            }]
+          }
+        }
+      });
+    }
+
+    function plot_tweets_per_day(tweets_per_day) {
+      console.log(tweets_per_day)
+      var labels = $.map(tweets_per_day, function (value, key) {
+        return key
+      });
+      console.log(labels)
+      //line
+      var datasets = [];
+      for (h in tweets_per_day) {
+        var hashtag = tweets_per_day[h];
+        var data = $.map(hashtag.values, function (value, key) {
+          return value
+        });
+        var labels = $.map(hashtag.values, function (value, key) {
+          return key
+        });
+        var color = hashtag.color
+        if (color.length > 7){
+          color = color.slice(0, 7)
+        }
+        color += "88"
+        var dataset = {
+          label: h,
+          backgroundColor: [color],
+          data: data
+        };
+        datasets.push(dataset)
+      }
+
+      var ctxL = document.getElementById("tweets_per_day_chart").getContext('2d');
+      var chart = new Chart(ctxL, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: datasets
+        },
+        options: {
+          responsive: true
+        }
+      });
+    };
+
+    function plot_tweets_per_lang(tweets_per_lang) {
+      var data = $.map(tweets_per_lang, function (value, key) {
+        return value
+      });
+      var labels = $.map(tweets_per_lang, function (value, key) {
+        return key
+      });
+
+      var canvas = document.getElementById("tweets_per_lang_chart")
+      var ctxD = canvas.getContext('2d');
+      ctxD.setTransform(1, 0, 0, 1, 0, 0);
+      ctxD.clearRect(0, 0, canvas.width, canvas.height);
+      ctxD.restore();
+      var chart = new Chart(ctxD, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360"],
+            hoverBackgroundColor: ["#FF5A5E", "#5AD3D1", "#FFC870", "#A8B3C5", "#616774"]
+          }]
+        },
+        options: {
+          responsive: true
+        }
+      });
+    }
+
+    function connect() {
+
+      var ws_url = 'ws://' + window.location.host + '/ws/sync/';
+      var socket = new WebSocket(ws_url);
+
+      socket.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        if (data.hasOwnProperty('content')) {
+          if (data.content.hasOwnProperty('tweets')) {
+            updateTweets(data.content.tweets)
+          }
+          if (data.content.hasOwnProperty('summary')) {
+            updateSummary(data.content.summary)
+          }
+          if (data.content.hasOwnProperty('hashtags')) {
+            updateHashtags(data.content.hashtags, data.content.selected_hashtag)
+          }
+          if (data.content.hasOwnProperty('tweets_per_hashtag')) {
+            plotTweetsPerHashtag(data.content.tweets_per_hashtag)
+          }
+          if (data.content.hasOwnProperty('tweets_per_day')) {
+            plot_tweets_per_day(data.content.tweets_per_day)
+          }
+          if (data.content.hasOwnProperty('tweets_per_lang')) {
+            plot_tweets_per_lang(data.content.tweets_per_lang)
+          }
+        }
+
+      };
+
+      socket.onclose = function (e) {
+        console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+        setTimeout(function () {
+          connect();
+        }, 1000);
+      };
+
+      return socket
+    };
+    var socket = connect()
+  </script>
+  <!-- ./ WebSocket-->
+  <script>
+    // Tooltips Initialization
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    })
+  </script>
+
+  <!--Google Maps-->
+  <script src="https://maps.google.com/maps/api/js"></script>
+  <script>
+    // Regular map
+    function regular_map() {
+      var var_location = new google.maps.LatLng(40.725118, -73.997699);
+
+      var var_mapoptions = {
+        center: var_location,
+        zoom: 14
+      };
+
+      var var_map = new google.maps.Map(document.getElementById("map-container"),
+        var_mapoptions);
+
+      var var_marker = new google.maps.Marker({
+        position: var_location,
+        map: var_map,
+        title: "New York"
+      });
+    }
+
+    new Chart(document.getElementById("horizontalBar"), {
+      "type": "horizontalBar",
+      "data": {
+        "labels": ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Grey"],
+        "datasets": [{
+          "label": "My First Dataset",
+          "data": [22, 33, 55, 12, 86, 23, 14],
+          "fill": false,
+          "backgroundColor": ["rgba(255, 99, 132, 0.2)", "rgba(255, 159, 64, 0.2)",
+            "rgba(255, 205, 86, 0.2)", "rgba(75, 192, 192, 0.2)",
+            "rgba(54, 162, 235, 0.2)",
+            "rgba(153, 102, 255, 0.2)", "rgba(201, 203, 207, 0.2)"
+          ],
+          "borderColor": ["rgb(255, 99, 132)", "rgb(255, 159, 64)", "rgb(255, 205, 86)",
+            "rgb(75, 192, 192)", "rgb(54, 162, 235)", "rgb(153, 102, 255)",
+            "rgb(201, 203, 207)"
+          ],
+          "borderWidth": 1
+        }]
+      },
+      "options": {
+        "scales": {
+          "xAxes": [{
+            "ticks": {
+              "beginAtZero": true
+            }
+          }]
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
