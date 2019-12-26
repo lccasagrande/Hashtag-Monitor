@@ -78,6 +78,17 @@ class HashtagTests(TestCase):
         self.assertIn('name', cm.exception.message_dict)
         self.assertIn('A hashtag is not case sensitive', msgs[0])
 
+    def test_max_number_of_hashtags(self):
+        max_nb = 10
+        for i in range(max_nb):
+            Hashtag.objects.create(name=f"#Test{i}")
+        with self.assertRaises(ValidationError) as cm:
+            Hashtag.objects.create(name=f"#Test{max_nb}")
+
+        msgs = list(cm.exception.message_dict.values())
+        self.assertIn('name', cm.exception.message_dict)
+        self.assertIn(f"The maximum number of hashtags is {max_nb}.", msgs[0])
+
     def test_duplicate_hashtag_must_raise_exception(self):
         h = Hashtag.objects.create(name="#Test")
         with self.assertRaises(ValidationError) as cm:

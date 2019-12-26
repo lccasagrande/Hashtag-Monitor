@@ -39,8 +39,9 @@ def validate_is_not_duplicate(value):
 
 
 def validate_nb_hashtag(value):
-    if Hashtag.objects.count() == 400:
-        raise ValidationError("The maximum number of hashtags is 400.")
+    max_nb = 10
+    if Hashtag.objects.count() == max_nb:
+        raise ValidationError(f"The maximum number of hashtags is {max_nb}.")
 
 
 COLORS_PALETTE = ['#3b465e', '#2e3951', '#1c2a48', '#1c2331', '#e53935', '#d32f2f', '#c62828', '#b71c1c', '#d81b60', '#c2185b', '#ad1457', '#880e4f', '#8e24aa', '#7b1fa2', '#6a1b9a', '#4a148c', '#5e35b1', '#512da8', '#4527a0', '#311b92', '#3949ab', '#303f9f', '#283593', '#1a237e', '#1e88e5', '#1976d2', '#1565c0', '#0d47a1', '#039be5', '#0288d1', '#0277bd', '#01579b', '#00acc1', '#0097a7', '#00838f', '#006064', '#00897b', '#00796b', '#00695c', '#004d40',

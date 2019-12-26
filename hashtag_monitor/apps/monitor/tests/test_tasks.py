@@ -58,5 +58,5 @@ class TasksTests(TestCase):
 
     @patch("tweepy.API")
     def test_get_remaining_tweets_in_background_should_start_task_in_background(self, tweepy_mock, add_job_mock, *args):
-        tasks.get_remaining_tweets_in_background(None, None, None, None)
+        tasks.get_remaining_tweets_in_background(None, None, None, None, None)
         self.assertEqual(1, add_job_mock.call_count)

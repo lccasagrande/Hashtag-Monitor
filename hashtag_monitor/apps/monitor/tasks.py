@@ -82,12 +82,19 @@ def sync_with_tweeter():
                                    replace_existing=True)
 
 
-def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, job_name, max_days=1):
+def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, history_length, job_name):
     def run_task():
+        count = 100
         channel_layer = channels.layers.get_channel_layer()
+        max_tweets = history_length
+        if max_tweets is not None:
+            assert max_tweets > 0
+            count = min(max_tweets, 100)
+            max_tweets -= 100
+
         tweets = twitter_api.search(q=hashtag_name,
                                     result_type='recent',
-                                    count=100,
+                                    count=count,
                                     max_id=max_id)
         while tweets['statuses']:
             try:
@@ -100,12 +107,18 @@ def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, job_na
                     async_to_sync(channel_layer.group_send)(
                         settings.TWEETER_SYNC_GROUP_NAME,
                         {"type": 'sync_new_tweets_from_hashtag', "hashtag": hashtag_name})
+
+                if max_tweets is not None:
+                    count = min(max_tweets, 100)
+                    max_tweets -= 100
+
+                if count <= 0:
+                    break
+
                 tweets = twitter_api.search(q=hashtag_name,
                                             result_type='recent',
-                                            count=100,
+                                            count=count,
                                             max_id=new_tweets[-1].id - 1)
-
-        return
 
     return MonitorScheduler().add_job(run_task,
                                       id=job_name,

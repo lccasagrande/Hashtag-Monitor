@@ -68,9 +68,10 @@ def get_hashtag_tweets(hashtag):
 
     tweets = models.Tweet.create_from_json(
         hashtag.name, *tweets['statuses'])
-    tasks.get_remaining_tweets_in_background(twitter_api,
-                                             hashtag.name,
+    tasks.get_remaining_tweets_in_background(twitter_api=twitter_api,
+                                             hashtag_name=hashtag.name,
                                              max_id=tweets[-1].id - 1,
+                                             history_length=400,
                                              job_name=hashtag.name)
 
 
