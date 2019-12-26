@@ -108,16 +108,16 @@ def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, histor
             except ObjectDoesNotExist:
                 break
             else:
-                if new_tweets:
-                    consumers.sync()
+                if not new_tweets:
+                    break
 
                 if max_tweets is not None:
                     count = min(max_tweets, 100)
                     max_tweets -= 100
-
                 if count <= 0:
                     break
 
+                consumers.sync()
                 tweets = twitter_api.search(q=hashtag_name,
                                             result_type='recent',
                                             count=count,
