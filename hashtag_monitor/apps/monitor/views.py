@@ -77,6 +77,7 @@ def hashtag_delete(request, name):
     deleted = models.Hashtag.delete_if_exists(name)
     if deleted:
         consumers.sync()
+        tasks.run_in_background(models.Tweet.remove_trash, "remove_trash_from_view")
     return HttpResponseRedirect(reverse('monitor:index'))
 
 
