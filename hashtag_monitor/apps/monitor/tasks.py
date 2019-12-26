@@ -1,9 +1,7 @@
 import logging
 import json
 
-import channels.layers
 import tweepy
-from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core import serializers
@@ -12,6 +10,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from . import twitter_utils as twt_utl
 from . import models
+from . import consumers
 from . import serializers
 
 
@@ -42,12 +41,15 @@ def start():
                       minutes=settings.TWEETER_SYNC_MINUTES,
                       id='tweeter_sync',
                       replace_existing=True)
-
     scheduler.start()
 
 
+def run_in_background(call, id=None):
+    assert callable(call)
+    return MonitorScheduler().add_job(call, id=id, replace_existing=True)
+
+
 def get_tweets(hashtag_name):
-    channel_layer = channels.layers.get_channel_layer()
     twitter_api = twt_utl.get_twitter_api()
     since_id = models.Tweet.get_since_id(hashtag_name=hashtag_name)
     tweets = twitter_api.search(q=hashtag_name,
@@ -57,16 +59,13 @@ def get_tweets(hashtag_name):
     while tweets['statuses']:
         try:
             new_tweets = models.Tweet.create_from_json(hashtag_name,
-                                                               *tweets['statuses'])
+                                                       *tweets['statuses'])
         except ObjectDoesNotExist:
             break
         else:
             if not new_tweets:
                 break
-
-            async_to_sync(channel_layer.group_send)(
-                settings.TWEETER_SYNC_GROUP_NAME,
-                {"type": 'sync_new_tweets_from_hashtag', "hashtag": hashtag_name})
+            consumers.sync()
             max_id = new_tweets[-1].id - 1
             tweets = twitter_api.search(q=hashtag_name,
                                         result_type='recent',
@@ -77,15 +76,13 @@ def get_tweets(hashtag_name):
 
 def sync_with_tweeter():
     for hashtag in models.Hashtag.objects.all():
-        MonitorScheduler().add_job(lambda: get_tweets(hashtag.name),
-                                   id=f"sync_{hashtag.name}",
-                                   replace_existing=True)
+        run_in_background(lambda: get_tweets(hashtag.name),
+                          id=f"sync_{hashtag.name}")
 
 
 def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, history_length, job_name):
     def run_task():
         count = 100
-        channel_layer = channels.layers.get_channel_layer()
         max_tweets = history_length
         if max_tweets is not None:
             assert max_tweets > 0
@@ -99,14 +96,12 @@ def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, histor
         while tweets['statuses']:
             try:
                 new_tweets = models.Tweet.create_from_json(hashtag_name,
-                                                                   *tweets['statuses'])
+                                                           *tweets['statuses'])
             except ObjectDoesNotExist:
                 break
             else:
                 if new_tweets:
-                    async_to_sync(channel_layer.group_send)(
-                        settings.TWEETER_SYNC_GROUP_NAME,
-                        {"type": 'sync_new_tweets_from_hashtag', "hashtag": hashtag_name})
+                    consumers.sync()
 
                 if max_tweets is not None:
                     count = min(max_tweets, 100)
@@ -119,7 +114,4 @@ def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, histor
                                             result_type='recent',
                                             count=count,
                                             max_id=new_tweets[-1].id - 1)
-
-    return MonitorScheduler().add_job(run_task,
-                                      id=job_name,
-                                      replace_existing=True)
+    return run_in_background(run_task, id=job_name)

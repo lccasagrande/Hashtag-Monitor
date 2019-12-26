@@ -1,9 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta, date
 import re
 import json
 
 import tweepy
-
 from django.db.models import Sum, Count
 from django.shortcuts import render
 from django.template import loader
@@ -14,16 +13,14 @@ from django.db import transaction
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.functions import TruncDay
 
 from . import forms
 from . import twitter_utils as twt_utl
 from . import tasks
 from . import models
+from . import consumers
 from . import serializers
-
-from django.db.models.functions import TruncDay
-
-from datetime import timedelta, date
 
 
 def get_default_context(request, **extra_context):
@@ -41,7 +38,6 @@ def get_default_context(request, **extra_context):
     tweets_per_hashtag = models.Hashtag.get_tweets_count_per_hashtag()
     tweets_per_day = models.Tweet.get_hashtag_tweets_per_day(num_days=7)
     tweets_per_lang = models.Tweet.get_tweets_per_lang()
-
 
     context = {
         'hashtag_list': hashtag_serializer.data,
@@ -68,6 +64,8 @@ def get_hashtag_tweets(hashtag):
 
     tweets = models.Tweet.create_from_json(
         hashtag.name, *tweets['statuses'])
+    if tweets:
+        consumers.sync()
     tasks.get_remaining_tweets_in_background(twitter_api=twitter_api,
                                              hashtag_name=hashtag.name,
                                              max_id=tweets[-1].id - 1,
@@ -76,7 +74,9 @@ def get_hashtag_tweets(hashtag):
 
 
 def hashtag_delete(request, name):
-    models.Hashtag.delete_if_exists(name)
+    deleted = models.Hashtag.delete_if_exists(name)
+    if deleted:
+        consumers.sync()
     return HttpResponseRedirect(reverse('monitor:index'))
 
 

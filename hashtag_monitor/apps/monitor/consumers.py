@@ -11,8 +11,7 @@ from . import models
 from . import serializers
 
 
-@receiver(post_delete, sender=models.Hashtag)
-def sync_hashtags(sender, instance, using, **kwargs):
+def sync():
     channel_layer = channels.layers.get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         settings.TWEETER_SYNC_GROUP_NAME, {"type": 'sync', "message": ""})
@@ -67,7 +66,7 @@ class TweeterConsumer(JsonWebsocketConsumer):
 
         # Latest Tweets
         tweets = models.Tweet.get_latest_tweets(hashtag_name=self.filters['hashtag'],
-                                                        count=settings.LATEST_TWEETS_NB)
+                                                count=settings.LATEST_TWEETS_NB)
         tweet_serializer = serializers.TweetSerializer(tweets, many=True)
 
         # Summary
