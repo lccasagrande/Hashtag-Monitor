@@ -66,11 +66,11 @@ def get_hashtag_tweets(hashtag):
         hashtag.name, *tweets['statuses'])
     if tweets:
         consumers.sync()
-    tasks.get_remaining_tweets_in_background(twitter_api=twitter_api,
+        tasks.get_remaining_tweets_in_background(twitter_api=twitter_api,
                                              hashtag_name=hashtag.name,
                                              max_id=tweets[-1].id - 1,
                                              history_length=400,
-                                             job_name=hashtag.name)
+                                             job_name=f"populate_{hashtag.name}")
 
 
 def hashtag_delete(request, name):
