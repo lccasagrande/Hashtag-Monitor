@@ -11,5 +11,5 @@ class HashtagForm(forms.ModelForm):
         fields = ['name']
         widgets = {'name': forms.TextInput(
             attrs={'class': 'form-control', 'required': True})}
-        labels = {'name': "What're you looking?"}
+        labels = {'name': "What're you looking for?"}
         error_messages={'unique':"This hashtag has already been added."}
