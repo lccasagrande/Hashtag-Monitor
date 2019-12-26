@@ -36,10 +36,18 @@ def start():
         logging.getLogger('apscheduler').setLevel(logging.DEBUG)
 
     scheduler = MonitorScheduler(daemon=True)
+    scheduler.add_job(models.Tweet.remove_trash,
+                      'interval',
+                      minutes=settings.CLEAN_TRASH_FROM_DB_EVERY,
+                      id='db_clean_trash',
+                      name='db_clean_trash',
+                      replace_existing=True)
+
     scheduler.add_job(sync_with_tweeter,
                       'interval',
                       minutes=settings.TWEETER_SYNC_MINUTES,
                       id='tweeter_sync',
+                      name='tweeter_sync',
                       replace_existing=True)
     scheduler.start()
 

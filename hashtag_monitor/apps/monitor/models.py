@@ -138,7 +138,6 @@ class User(models.Model):
         self.full_clean()
         return super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
-
     @classmethod
     def update_or_create(cls, author):
         usr, _ = cls.objects.update_or_create(
@@ -167,6 +166,12 @@ class User(models.Model):
                 'profile_image': twitter_json.get('profile_image_url_https', None)
             })
         return usr
+
+    @classmethod
+    def remove_trash(cls):
+        usrs = cls.objects.filter(tweet=None)
+        if usrs:
+            usrs.delete()
 
 class Tweet(models.Model):
     id = models.BigIntegerField('Twitter tweet id', primary_key=True)
@@ -247,6 +252,13 @@ class Tweet(models.Model):
                 return cls.objects.earliest('pk').id
         except ObjectDoesNotExist:
             return None
+
+    @classmethod
+    def remove_trash(cls):
+        tweets = cls.objects.filter(
+            hashtags=None, tweet_retweeted=None, tweet_quoted=None)
+        if tweets:
+            tweets.delete()
 
     @classmethod
     def get_tweets_per_lang(cls, top=0, hashtag_name=None):
@@ -375,13 +387,3 @@ class Tweet(models.Model):
         return tweets
 
 
-@receiver(pre_delete, sender=Hashtag)
-def cascade_delete_tweets(sender, instance, **kwargs):
-    for tweet in instance.tweet_set.all():
-        if tweet.hashtags.count() <= 1:
-            tweet.delete()
-
-@receiver(post_delete, sender=Tweet)
-def cascade_delete_users(sender, instance, **kwargs):
-    if instance.author.tweet_set.count() == 0:
-        instance.author.delete()
