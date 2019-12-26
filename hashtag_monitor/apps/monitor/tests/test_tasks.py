@@ -11,7 +11,6 @@ from mock import Mock, patch, MagicMock
 
 # Create your tests here.
 from ..models import Tweet, User, Hashtag, COLORS_PALETTE
-from ..queries import TweetQueries, HashtagQueries, UserQueries
 from .. import tasks
 from .. import twitter_utils as twt_utl
 

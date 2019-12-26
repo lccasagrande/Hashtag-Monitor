@@ -15,11 +15,10 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.core.exceptions import ObjectDoesNotExist
 
-from .forms import *
+from . import forms
 from . import twitter_utils as twt_utl
-from .models import *
 from . import tasks
-from . import queries
+from . import models
 from . import serializers
 
 from django.db.models.functions import TruncDay
@@ -28,20 +27,20 @@ from datetime import timedelta, date
 
 
 def get_default_context(request, **extra_context):
-    summary = queries.TweetQueries.get_summary()
+    summary = models.Tweet.get_summary()
 
-    tweets = queries.TweetQueries.get_latest_tweets(
+    tweets = models.Tweet.get_latest_tweets(
         count=settings.LATEST_TWEETS_NB)
     tweet_serializer = serializers.TweetSerializer(tweets, many=True)
 
-    hashtags = queries.HashtagQueries.get_hashtags_sorted()
+    hashtags = models.Hashtag.get_hashtags_sorted()
     hashtag_serializer = serializers.HashtagSerializer(hashtags, many=True)
 
-    hashtag_form = HashtagForm()
+    hashtag_form = forms.HashtagForm()
 
-    tweets_per_hashtag = queries.HashtagQueries.get_tweets_count_per_hashtag()
-    tweets_per_day = queries.TweetQueries.get_hashtag_tweets_per_day(num_days=7)
-    tweets_per_lang = queries.TweetQueries.get_tweets_per_lang()
+    tweets_per_hashtag = models.Hashtag.get_tweets_count_per_hashtag()
+    tweets_per_day = models.Tweet.get_hashtag_tweets_per_day(num_days=7)
+    tweets_per_lang = models.Tweet.get_tweets_per_lang()
 
 
     context = {
@@ -67,7 +66,7 @@ def get_hashtag_tweets(hashtag):
                                 count=100,
                                 include_entities=True)
 
-    tweets = queries.TweetQueries.create_from_json(
+    tweets = models.Tweet.create_from_json(
         hashtag.name, *tweets['statuses'])
     tasks.get_remaining_tweets_in_background(twitter_api,
                                              hashtag.name,
@@ -76,14 +75,14 @@ def get_hashtag_tweets(hashtag):
 
 
 def hashtag_delete(request, name):
-    queries.HashtagQueries.delete_if_exists(name)
+    models.Hashtag.delete_if_exists(name)
     return HttpResponseRedirect(reverse('monitor:index'))
 
 
 def hashtag_create(request):
     context, err = {}, None
     if request.method == 'POST':
-        form = HashtagForm(request.POST or None)
+        form = forms.HashtagForm(request.POST or None)
         if form.is_valid():
             with transaction.atomic():
                 hashtag = form.save()
@@ -96,7 +95,7 @@ def hashtag_create(request):
                 else:
                     return HttpResponseRedirect(reverse('monitor:index'))
     else:
-        form = HashtagForm()
+        form = forms.HashtagForm()
     context = get_default_context(request,
                                   hashtag_form=form,
                                   twitter_error=err)

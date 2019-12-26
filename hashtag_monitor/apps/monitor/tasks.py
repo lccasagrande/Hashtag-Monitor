@@ -12,7 +12,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 from . import twitter_utils as twt_utl
 from . import models
-from . import queries
 from . import serializers
 
 
@@ -57,7 +56,7 @@ def get_tweets(hashtag_name):
                                 since_id=since_id)
     while tweets['statuses']:
         try:
-            new_tweets = queries.TweetQueries.create_from_json(hashtag_name,
+            new_tweets = models.Tweet.create_from_json(hashtag_name,
                                                                *tweets['statuses'])
         except ObjectDoesNotExist:
             break
@@ -83,7 +82,7 @@ def sync_with_tweeter():
                                    replace_existing=True)
 
 
-def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, job_name):
+def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, job_name, max_days=1):
     def run_task():
         channel_layer = channels.layers.get_channel_layer()
         tweets = twitter_api.search(q=hashtag_name,
@@ -92,16 +91,15 @@ def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, job_na
                                     max_id=max_id)
         while tweets['statuses']:
             try:
-                new_tweets = queries.TweetQueries.create_from_json(hashtag_name,
+                new_tweets = models.Tweet.create_from_json(hashtag_name,
                                                                    *tweets['statuses'])
-
+            except ObjectDoesNotExist:
+                break
+            else:
                 if new_tweets:
                     async_to_sync(channel_layer.group_send)(
                         settings.TWEETER_SYNC_GROUP_NAME,
                         {"type": 'sync_new_tweets_from_hashtag', "hashtag": hashtag_name})
-            except ObjectDoesNotExist:
-                break
-            else:
                 tweets = twitter_api.search(q=hashtag_name,
                                             result_type='recent',
                                             count=100,

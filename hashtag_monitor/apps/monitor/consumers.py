@@ -8,7 +8,6 @@ from django.conf import settings
 from channels.generic.websocket import JsonWebsocketConsumer
 
 from . import models
-from . import queries
 from . import serializers
 
 
@@ -67,18 +66,18 @@ class TweeterConsumer(JsonWebsocketConsumer):
         hashtag_serializer = serializers.HashtagSerializer(hashtags, many=True)
 
         # Latest Tweets
-        tweets = queries.TweetQueries.get_latest_tweets(hashtag_name=self.filters['hashtag'],
+        tweets = models.Tweet.get_latest_tweets(hashtag_name=self.filters['hashtag'],
                                                         count=settings.LATEST_TWEETS_NB)
         tweet_serializer = serializers.TweetSerializer(tweets, many=True)
 
         # Summary
-        summary = queries.TweetQueries.get_summary(
+        summary = models.Tweet.get_summary(
             hashtag_name=self.filters['hashtag'])
 
-        tweets_per_hashtag = queries.HashtagQueries.get_tweets_count_per_hashtag()
-        tweets_per_day = queries.TweetQueries.get_hashtag_tweets_per_day(
+        tweets_per_hashtag = models.Hashtag.get_tweets_count_per_hashtag()
+        tweets_per_day = models.Tweet.get_hashtag_tweets_per_day(
             num_days=7)
-        tweets_per_lang = queries.TweetQueries.get_tweets_per_lang(
+        tweets_per_lang = models.Tweet.get_tweets_per_lang(
             top=3, hashtag_name=self.filters['hashtag'])
 
         content = {
