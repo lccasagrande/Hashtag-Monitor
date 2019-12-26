@@ -100,8 +100,7 @@ DATABASES = {
     }
 }
 
-db_from_env = dj_database_url.config()
-del db_from_env['CONN_MAX_AGE']
+db_from_env = dj_database_url.config(conn_max_age=0)
 DATABASES['default'].update(db_from_env)
 
 # Password validation
