@@ -37,27 +37,24 @@ class TweeterConsumer(JsonWebsocketConsumer):
         )
 
     def receive_json(self, text_data):
-        if not isinstance(text_data, dict):
-            return
-
-        filter_changed = False
+        changed = False
         content = text_data.get('content', None)
         content_type = text_data.get('content_type', None)
         if content_type == 'filter':
             for name, flter in content.items():
-                if name in self.filters and flter != self.filters[name]:
-                    self.filters[name] = flter
-                    filter_changed = True
+                changed = self._set_filter(name, flter)
 
-        if filter_changed:
+        if changed:
             self._sync()
 
-    def sync_new_tweets_from_hashtag(self, event):
-        hashtag_name = event.get('hashtag', None)
-        if not hashtag_name:
-            return
-        if not self.filters['hashtag'] or self.filters['hashtag'] == hashtag_name:
-            self._sync()
+    def sync(self, _=None):
+        self._sync()
+
+    def _set_filter(self, name, value):
+        if name in self.filters and value != self.filters[name]:
+            self.filters[name] = value
+            return True
+        return False
 
     def _sync(self):
         # Hashtags
@@ -90,6 +87,3 @@ class TweeterConsumer(JsonWebsocketConsumer):
         }
 
         self.send_json({"content_type": 'sync', "content": content})
-
-    def sync(self, _=None):
-        self._sync()
