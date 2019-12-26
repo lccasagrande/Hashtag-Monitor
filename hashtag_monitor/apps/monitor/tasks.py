@@ -84,8 +84,7 @@ def get_tweets(hashtag_name):
 
 def sync_with_tweeter():
     for hashtag in models.Hashtag.objects.all():
-        run_in_background(lambda: get_tweets(hashtag.name),
-                          id=f"sync_{hashtag.name}")
+        get_tweets(hashtag.name)
 
 
 def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, history_length, job_name):
