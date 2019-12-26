@@ -507,7 +507,7 @@
         var hashtag_name_utf8 = hashtag.name.replace("#", "%23");
         var html = `<div class="list-group-item d-flex justify-content-between align-items-center pl-1 pr-2 py-2">
                       ${hashtag.name}
-                      <a class="far fa-trash-alt close" href="hashtag/delete/${hashtag_name_utf8}"></a>
+                      <a class="far fa-trash-alt close" href=//${window.location.host}/hashtag/delete/${hashtag_name_utf8}"></a>
                     </div>`;
         $("#hashtag_list_div").prepend(html);
         if (selected_hashtag == hashtag.name){
