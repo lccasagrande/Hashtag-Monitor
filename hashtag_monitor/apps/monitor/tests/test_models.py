@@ -149,6 +149,37 @@ class HashtagTests(TestCase):
 
 
 class UserTests(TestCase):
+    def test_user_must_not_be_deleted_when_there_is_a_tweet(self):
+        date = datetime.datetime.now()
+        author = User.objects.create(id=1,
+                                     name="Opa",
+                                     screen_name="Test",
+                                     created_at=date)
+        tweet1 = Tweet.objects.create(id=1,
+                                      author=author,
+                                      text="A",
+                                      created_at=date)
+        tweet2 = Tweet.objects.create(id=2,
+                                      author=author,
+                                      text="A",
+                                      created_at=date)
+        tweet1.delete()
+        self.assertEqual(1, Tweet.objects.count())
+        self.assertEqual(1, User.objects.count())
+
+    def test_user_must_be_deleted_when_there_is_no_hashtag(self):
+        author = User.objects.create(id=1,
+                                     name="Opa",
+                                     screen_name="Test",
+                                     created_at=datetime.datetime.now())
+        tweet = Tweet.objects.create(id=1,
+                                     author=author,
+                                     retweet_count=20,
+                                     text="A",
+                                     created_at=datetime.datetime.now())
+        tweet.delete()
+        self.assertEqual(0, User.objects.count())
+
     def test_id_must_accept_bigint(self):
         big_int = 9223372036854775807
         user = User.objects.create(id=big_int,
@@ -585,6 +616,7 @@ class TweetTests(TestCase):
         tweet.hashtags.add(h1)
         h1.delete()
         self.assertEqual(0, Tweet.objects.count())
+        self.assertEqual(0, User.objects.count())
 
     def test_tweet_must_not_be_deleted_when_there_is_a_hashtag(self):
         author = User.objects.create(id=1,

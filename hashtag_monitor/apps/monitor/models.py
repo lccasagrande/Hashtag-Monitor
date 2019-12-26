@@ -2,7 +2,7 @@ import datetime
 
 import numpy as np
 
-from django.db.models.signals import pre_delete, post_save
+from django.db.models.signals import pre_delete, post_save, post_delete
 from django.dispatch import receiver
 from django.db import models, transaction
 from django.db.models import Sum, Count
@@ -380,3 +380,8 @@ def cascade_delete_tweets(sender, instance, **kwargs):
     for tweet in instance.tweet_set.all():
         if tweet.hashtags.count() <= 1:
             tweet.delete()
+
+@receiver(post_delete, sender=Tweet)
+def cascade_delete_users(sender, instance, **kwargs):
+    if instance.author.tweet_set.count() == 0:
+        instance.author.delete()
