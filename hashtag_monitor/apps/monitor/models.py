@@ -128,7 +128,8 @@ class User(models.Model):
     profile_image = models.URLField("Profile image url",
                                     default=None,
                                     null=True,
-                                    blank=True)
+                                    blank=True,
+                                    max_length=400)
 
     def __str__(self):
         return f"{self.name}"

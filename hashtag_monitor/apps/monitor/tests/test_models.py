@@ -150,6 +150,21 @@ class HashtagTests(TestCase):
 
 
 class UserTests(TestCase):
+    def test_url_too_long_must_raise_exception(self):
+        url = "https://www.test.com/" + "".join("A" for _ in range(376)) + ".jpg"
+        with self.assertRaises(ValidationError) as cm:
+            author = User.objects.create(id=1,
+                                     name="Opa",
+                                     screen_name="Test",
+                                     created_at=datetime.datetime.now(),
+                                     profile_image=url)
+
+
+        msgs = list(cm.exception.message_dict.values())
+        self.assertIn('profile_image', cm.exception.message_dict)
+        self.assertIn('Ensure this value has at most 400 characters (it has 401).', msgs[0])
+
+
     def test_create_from_json(self):
         d = pytz.utc.localize(datetime.datetime.utcnow())
         j = {
