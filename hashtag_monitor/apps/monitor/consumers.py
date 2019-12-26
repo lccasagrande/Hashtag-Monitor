@@ -58,7 +58,7 @@ class TweeterConsumer(JsonWebsocketConsumer):
 
     def _sync(self):
         # Hashtags
-        hashtags = models.Hashtag.objects.all().order_by('name')
+        hashtags = models.Hashtag.get_hashtags_sorted()
         hashtag_serializer = serializers.HashtagSerializer(hashtags, many=True)
 
         # Latest Tweets
