@@ -139,70 +139,49 @@ class User(models.Model):
 
     @classmethod
     def update_or_create(cls, author):
-        try:
-            usr = cls.objects.get(pk=author.id)
-        except ObjectDoesNotExist:
-            usr = cls.objects.create(
-                id=author.id,
-                name=author.name,
-                screen_name=author.screen_name,
-                friends_count=author.friends_count,
-                followers_count=author.followers_count,
-                created_at=author.created_at,
-                profile_image=author.profile_image
-            )
-        else:
-            usr.id=author.id
-            usr.name=author.name
-            usr.screen_name=author.screen_name
-            usr.friends_count=author.friends_count
-            usr.followers_count=author.followers_count
-            usr.created_at=author.created_at
-            usr.profile_image=author.profile_image
-            usr.save()
+        usr, _ = cls.objects.update_or_create(
+            pk=author.id,
+            defaults={
+                'name': author.name,
+                'screen_name': author.screen_name,
+                'created_at': author.created_at,
+                'friends_count': author.friends_count,
+                'followers_count': author.followers_count,
+                'profile_image': author.profile_image
+            })
         return usr
 
     @classmethod
     def update_or_create_from_json(cls, twitter_json):
         created_at = twt_utls.convert_to_datetime(twitter_json['created_at'])
-        try:
-            usr = cls.objects.get(pk=twitter_json['id'])
-        except ObjectDoesNotExist:
-            usr = cls.objects.create(
-                id=twitter_json['id'],
-                name=twitter_json['name'],
-                screen_name=twitter_json['screen_name'],
-                friends_count=twitter_json.get('friends_count', 0),
-                followers_count=twitter_json.get('followers_count', 0),
-                created_at=created_at,
-                profile_image=twitter_json.get('profile_image_url_https', None)
-            )
-        else:
-            usr.name = twitter_json['name']
-            usr.screen_name = twitter_json['screen_name']
-            usr.created_at = created_at
-            usr.friends_count = twitter_json.get('friends_count', usr.friends_count)
-            usr.followers_count = twitter_json.get('followers_count', usr.followers_count)
-            usr.profile_image = twitter_json.get('profile_image_url_https', usr.profile_image)
-            usr.save()
+        usr, _ = cls.objects.update_or_create(
+            pk=twitter_json['id'],
+            defaults={
+                'name': twitter_json['name'],
+                'screen_name': twitter_json['screen_name'],
+                'friends_count': twitter_json.get('friends_count', 0),
+                'followers_count': twitter_json.get('followers_count', 0),
+                'created_at': created_at,
+                'profile_image': twitter_json.get('profile_image_url_https', None)
+            })
         return usr
 
     @classmethod
     def remove_trash(cls):
-        usrs=cls.objects.filter(tweet = None)
+        usrs = cls.objects.filter(tweet=None)
         if usrs:
             usrs.delete()
 
 
 class Tweet(models.Model):
-    id=models.BigIntegerField('Twitter tweet id', primary_key = True)
-    quoted_tweet=models.ForeignKey('self',
-                                     on_delete = models.CASCADE,
-                                     null = True,
-                                     related_name = 'tweet_quoted',
-                                     default = None,
-                                     blank = True)
-    retweeted=models.ForeignKey('self',
+    id = models.BigIntegerField('Twitter tweet id', primary_key=True)
+    quoted_tweet = models.ForeignKey('self',
+                                     on_delete=models.CASCADE,
+                                     null=True,
+                                     related_name='tweet_quoted',
+                                     default=None,
+                                     blank=True)
+    retweeted = models.ForeignKey('self',
                                   on_delete=models.CASCADE,
                                   null=True,
                                   related_name='tweet_retweeted',
