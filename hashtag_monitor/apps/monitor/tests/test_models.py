@@ -1,5 +1,6 @@
 import datetime
 import random
+import pytz
 
 from django.test import TestCase
 from django.utils import timezone
@@ -149,6 +150,34 @@ class HashtagTests(TestCase):
 
 
 class UserTests(TestCase):
+    def test_create_from_json(self):
+        d = pytz.utc.localize(datetime.datetime.utcnow())
+        j = {
+            'id': 1,
+            'name': "test",
+                    'screen_name': "stest",
+                    'created_at': d.strftime("%a %b %d %H:%M:%S %z %Y")
+        }
+        User.update_or_create_from_json(j)
+
+    def test_update_from_json(self):
+        author = User.objects.create(id=1,
+                                     name="Opa",
+                                     screen_name="Test",
+                                     created_at=datetime.datetime.now())
+
+        d = pytz.utc.localize(datetime.datetime.utcnow())
+        j = {
+            'id': 1,
+            'name': "test",
+            'screen_name': "stest",
+            'created_at': d.strftime("%a %b %d %H:%M:%S %z %Y")
+        }
+        User.update_or_create_from_json(j)
+        a = User.objects.get(pk=1)
+        self.assertEqual(a.name, "test")
+        self.assertEqual(a.screen_name, "stest")
+
     def test_remove_trash_must_delete_users_without_tweets(self):
         author = User.objects.create(id=1,
                                      name="Opa",
@@ -271,6 +300,50 @@ class UserTests(TestCase):
 
 
 class TweetTests(TestCase):
+    def create_from_json(self):
+        h = Hashtag.objects.create("#Test")
+        d = pytz.utc.localize(datetime.datetime.utcnow())
+        j = {
+                "id": 1,
+                "text": "Test",
+                "created_at": d.strftime("%a %b %d %H:%M:%S %z %Y"),
+                'entities': {'hashtags': []},
+                "user": {
+                    'id': 1,
+                    'name': "test",
+                    'screen_name': "stest",
+                    'created_at': d.strftime("%a %b %d %H:%M:%S %z %Y")
+                }
+            }
+        Tweet.create_from_json(h.name, j)
+        tweet = Tweet.objects.get(pk=1)
+        self.assertEqual(tweet.text, "Test")
+
+    def create_from_json_must_update_author(self):
+        author = User.objects.create(id=1,
+                                     name="Opa",
+                                     screen_name="Test",
+                                     created_at=datetime.datetime.now())
+
+        h = Hashtag.objects.create("#Test")
+        d = pytz.utc.localize(datetime.datetime.utcnow())
+        j = {
+                "id": 1,
+                "text": "Test",
+                "created_at": d.strftime("%a %b %d %H:%M:%S %z %Y"),
+                'entities': {'hashtags': []},
+                "user": {
+                    'id': 1,
+                    'name': "test",
+                    'screen_name': "stest",
+                    'created_at': d.strftime("%a %b %d %H:%M:%S %z %Y")
+                }
+            }
+        Tweet.create_from_json(h.name, j)
+        usr = User.objects.get(pk=1)
+        self.assertEqual(usr.name, "test")
+        self.assertEqual(usr.sname, "stest")
+
     def test_remove_trash_must_delete_tweets_without_hashtags(self):
         author = User.objects.create(id=1,
                                      name="Opa",
