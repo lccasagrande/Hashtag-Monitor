@@ -56,9 +56,9 @@ class HashtagTests(TestCase):
         h2 = Hashtag.objects.create(name="#B")
         h3 = Hashtag.objects.create(name="#A")
         hashtags_sorted = Hashtag.get_hashtags_sorted()
-        self.assertEqual(h3, hashtags_sorted[0])
+        self.assertEqual(h3, hashtags_sorted[2])
         self.assertEqual(h2, hashtags_sorted[1])
-        self.assertEqual(h1, hashtags_sorted[2])
+        self.assertEqual(h1, hashtags_sorted[0])
 
     def test_delete_if_exists(self):
         h1 = Hashtag.objects.create(name="#Test")
