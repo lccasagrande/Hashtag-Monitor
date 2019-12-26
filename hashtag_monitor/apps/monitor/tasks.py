@@ -54,7 +54,7 @@ def start():
 
 def run_in_background(call, id=None):
     assert callable(call)
-    return MonitorScheduler().add_job(call, id=id, replace_existing=True)
+    return MonitorScheduler().add_job(call, id=id, name=id, replace_existing=True)
 
 
 def get_tweets(hashtag_name):

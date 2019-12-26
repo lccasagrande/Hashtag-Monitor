@@ -98,8 +98,7 @@ class Hashtag(models.Model):
     def delete_if_exists(cls, hashtag_name):
         try:
             hashtag = cls.objects.get(pk=hashtag_name)
-            with transaction.atomic():
-                hashtag.delete()
+            hashtag.delete()
         except ObjectDoesNotExist:
             return False
         else:
@@ -153,7 +152,7 @@ class User(models.Model):
         return usr
 
     @classmethod
-    def create_from_json(cls, twitter_json):
+    def update_or_create_from_json(cls, twitter_json):
         created_at = twt_utls.convert_to_datetime(twitter_json['created_at'])
         usr, _ = cls.objects.update_or_create(
             pk=twitter_json['id'],
@@ -359,7 +358,7 @@ class Tweet(models.Model):
                     hashtags.append(ht)
 
             created_at = twt_utls.convert_to_datetime(data['created_at'])
-            author = User.create_from_json(data['user'])
+            author = User.update_or_create_from_json(data['user'])
             tweet, created = cls.objects.get_or_create(
                 pk=data['id'],
                 defaults={
@@ -379,11 +378,11 @@ class Tweet(models.Model):
             return tweet, created
 
         tweets = []
-        with transaction.atomic():
-            for j in tweeter_json:
+        for j in tweeter_json:
+            with transaction.atomic():
                 tweet, created = create_tweet(j, hashtag_name)
-                if created:
-                    tweets.append(tweet)
+            if created:
+                tweets.append(tweet)
         return tweets
 
 
