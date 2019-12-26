@@ -509,7 +509,7 @@
                       ${hashtag.name}
                       <a class="far fa-trash-alt close" href=//${window.location.host}/hashtag/delete/${hashtag_name_utf8}></a>
                     </div>`;
-        $("#hashtag_list_div").prepend(html);
+        $("#hashtag_list_div").append(html);
         if (selected_hashtag == hashtag.name){
           $("#filter_hashtag_id").append(`<option selected value=${hashtag.name}>${hashtag.name}</option>`)
         }

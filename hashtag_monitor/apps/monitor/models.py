@@ -92,7 +92,7 @@ class Hashtag(models.Model):
 
     @classmethod
     def get_hashtags_sorted(cls):
-        return cls.objects.all().order_by('-name')
+        return cls.objects.all().order_by('name')
 
     @classmethod
     def delete_if_exists(cls, hashtag_name):
