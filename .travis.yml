@@ -12,7 +12,7 @@ env:
     - DB_NAME="travis_ci_test"
     - DJANGO_SETTINGS_MODULE="hashtag_monitor.settings.development"
 install:
-  - pip install -r requirements.txt
+  - pip install .
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - python scripts/manage.py migrate
