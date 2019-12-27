@@ -19,7 +19,6 @@ from . import forms
 from . import twitter_utils as twt_utl
 from . import tasks
 from . import models
-from . import consumers
 from . import serializers
 
 
@@ -66,8 +65,7 @@ def get_hashtag_tweets(hashtag):
 def hashtag_delete(request, name):
     deleted = models.Hashtag.delete_if_exists(name)
     if deleted:
-        consumers.sync()
-        tasks.run_in_background(models.Tweet.remove_trash, "remove_trash_from_view")
+        tasks.run_in_background(tasks.remove_trash_and_sync, "remove_trash_from_view")
     return HttpResponseRedirect(reverse('monitor:index'))
 
 

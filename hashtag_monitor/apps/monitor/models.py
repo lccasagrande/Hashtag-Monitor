@@ -257,10 +257,12 @@ class Tweet(models.Model):
 
     @classmethod
     def remove_trash(cls):
+        deleted = False
         tweets = cls.objects.filter(
             hashtags=None, tweet_retweeted=None, tweet_quoted=None)
         if tweets:
-            tweets.delete()
+            deleted, _ = tweets.delete()
+        return deleted
 
     @classmethod
     def get_tweets_per_lang(cls, top=0, hashtag_name=None):

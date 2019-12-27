@@ -36,7 +36,7 @@ def start():
         logging.getLogger('apscheduler').setLevel(logging.DEBUG)
 
     scheduler = MonitorScheduler(daemon=True)
-    scheduler.add_job(models.Tweet.remove_trash,
+    scheduler.add_job(remove_trash_and_sync,
                       'interval',
                       minutes=settings.CLEAN_TRASH_FROM_DB_EVERY,
                       id='db_clean_trash',
@@ -55,6 +55,12 @@ def start():
 def run_in_background(call, id=None):
     assert callable(call)
     return MonitorScheduler().add_job(call, id=id, name=id, replace_existing=True)
+
+
+def remove_trash_and_sync():
+    deleted = models.Tweet.remove_trash()
+    if deleted:
+        consumers.sync()
 
 
 def get_tweets(hashtag_name):

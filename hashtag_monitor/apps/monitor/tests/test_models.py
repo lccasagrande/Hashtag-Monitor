@@ -360,8 +360,9 @@ class TweetTests(TestCase):
                                       retweet_count=20,
                                       text="A",
                                       created_at=datetime.datetime.now())
-        Tweet.remove_trash()
+        deleted = Tweet.remove_trash()
         self.assertEqual(0, Tweet.objects.all().count())
+        self.assertTrue(deleted)
 
     def test_remove_trash_must_not_delete_tweets_with_hashtag(self):
         author = User.objects.create(id=1,
@@ -374,8 +375,9 @@ class TweetTests(TestCase):
                                       created_at=datetime.datetime.now())
         h1 = Hashtag.objects.create(name="#Test")
         parent.hashtags.add(h1)
-        Tweet.remove_trash()
+        deleted = Tweet.remove_trash()
         self.assertEqual(1, Tweet.objects.all().count())
+        self.assertFalse(deleted)
 
     def test_remove_trash_must_not_delete_tweets_retweeted(self):
         author = User.objects.create(id=1,
