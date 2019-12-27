@@ -1,19 +1,19 @@
 language: python
-    python:
-      - "3.7"
-    services:
-      - postgresql
-    env:
-      - DB_USER="travis"
-      - DB_PASSWORD=""
-      - DB_HOST="localhost"
-      - DB_PORT=""
-      - DB_NAME="travis_ci_test"
-      - DJANGO_SETTINGS_MODULE="hashtag_monitor.settings.development"
-    install:
-      - pip install -r requirements.txt
-    before_script:
-      - psql -c 'create database travis_ci_test;' -U postgres
-      - python scripts/manage.py migrate
-    script:
-      - python scripts/manage.py test hashtag_monitor.apps.monitor
+python:
+  - "3.7"
+services:
+  - postgresql
+env:
+  - DB_USER="travis"
+  - DB_PASSWORD=""
+  - DB_HOST="localhost"
+  - DB_PORT=""
+  - DB_NAME="travis_ci_test"
+  - DJANGO_SETTINGS_MODULE="hashtag_monitor.settings.development"
+install:
+  - pip install -r requirements.txt
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+  - python scripts/manage.py migrate
+script:
+  - python scripts/manage.py test hashtag_monitor.apps.monitor
