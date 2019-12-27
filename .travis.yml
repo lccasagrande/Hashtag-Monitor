@@ -18,6 +18,6 @@ before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - python scripts/manage.py migrate
 script:
-  - coverage run --source=. scripts/manage.py test hashtag_monitor.apps.monitor
+  - coverage run --source=hashtag_monitor.apps.monitor scripts/manage.py test hashtag_monitor.apps.monitor
 after_success:
   - coveralls
