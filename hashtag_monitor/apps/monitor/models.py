@@ -384,8 +384,7 @@ class Tweet(models.Model):
 
         tweets = []
         for j in tweeter_json:
-            with transaction.atomic():
-                tweet, created = create_tweet(j, hashtag_name)
+            tweet, created = create_tweet(j, hashtag_name)
             if created:
                 tweets.append(tweet)
         return tweets
