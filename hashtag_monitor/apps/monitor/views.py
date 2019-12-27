@@ -57,19 +57,9 @@ def get_default_context(request, **extra_context):
 
 def get_hashtag_tweets(hashtag):
     twitter_api = twt_utl.get_twitter_api()
-    tweets = twitter_api.search(q=hashtag.name,
-                                result_type='recent',
-                                count=100,
-                                include_entities=True)
-
-    tweets = models.Tweet.create_from_json(
-        hashtag.name, *tweets['statuses'])
-    if tweets:
-        consumers.sync()
-        tasks.get_remaining_tweets_in_background(twitter_api=twitter_api,
+    tasks.get_remaining_tweets_in_background(twitter_api=twitter_api,
                                              hashtag_name=hashtag.name,
-                                             max_id=tweets[-1].id - 1,
-                                             history_length=400,
+                                             history_length=500,
                                              job_name=f"populate_{hashtag.name}")
 
 

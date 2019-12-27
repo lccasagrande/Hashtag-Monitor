@@ -88,7 +88,7 @@ def sync_with_tweeter():
                           id=f"sync_{hashtag.name}")
 
 
-def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, history_length, job_name):
+def get_remaining_tweets_in_background(twitter_api, hashtag_name, history_length, job_name, max_id=None):
     def run_task():
         count = 100
         max_tweets = history_length
@@ -111,13 +111,15 @@ def get_remaining_tweets_in_background(twitter_api, hashtag_name, max_id, histor
                 if not new_tweets:
                     break
 
+                consumers.sync()
+
                 if max_tweets is not None:
                     count = min(max_tweets, 100)
                     max_tweets -= 100
+
                 if count <= 0:
                     break
 
-                consumers.sync()
                 tweets = twitter_api.search(q=hashtag_name,
                                             result_type='recent',
                                             count=count,
