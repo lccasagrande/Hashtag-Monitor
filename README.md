@@ -1,4 +1,4 @@
-# Hashtag-Monitor [![Build Status](https://travis-ci.com/lccasagrande/Hashtag-Monitor.svg?branch=master)](https://travis-ci.com/lccasagrande/Hashtag-Monitor)
+# Hashtag-Monitor [![Build Status](https://travis-ci.com/lccasagrande/Hashtag-Monitor.svg?branch=master)](https://travis-ci.com/lccasagrande/Hashtag-Monitor) [![Coverage Status](https://coveralls.io/repos/github/lccasagrande/Hashtag-Monitor/badge.svg?branch=master)](https://coveralls.io/github/lccasagrande/Hashtag-Monitor?branch=master)
 
 This repository contains a simple dashboard that lets you monitor your hashtags on Twitter.
 

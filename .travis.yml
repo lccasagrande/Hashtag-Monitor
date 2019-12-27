@@ -13,8 +13,11 @@ env:
     - DJANGO_SETTINGS_MODULE="hashtag_monitor.settings.development"
 install:
   - pip install .
+  - pip install coveralls
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - python scripts/manage.py migrate
 script:
-  - python scripts/manage.py test hashtag_monitor.apps.monitor
+  - coverage run --source=. scripts/manage.py test hashtag_monitor.apps.monitor
+after_success:
+  - coveralls
