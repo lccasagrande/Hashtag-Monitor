@@ -4,12 +4,13 @@ python:
 services:
   - postgresql
 env:
-  - DB_USER="travis"
-  - DB_PASSWORD=""
-  - DB_HOST="localhost"
-  - DB_PORT=""
-  - DB_NAME="travis_ci_test"
-  - DJANGO_SETTINGS_MODULE="hashtag_monitor.settings.development"
+  global:
+    - DB_USER="travis"
+    - DB_PASSWORD=""
+    - DB_HOST="localhost"
+    - DB_PORT=""
+    - DB_NAME="travis_ci_test"
+    - DJANGO_SETTINGS_MODULE="hashtag_monitor.settings.development"
 install:
   - pip install -r requirements.txt
 before_script:
