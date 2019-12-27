@@ -54,18 +54,11 @@ def get_default_context(request, **extra_context):
     return context
 
 
-def get_hashtag_tweets(hashtag):
-    twitter_api = twt_utl.get_twitter_api()
-    tasks.get_remaining_tweets_in_background(twitter_api=twitter_api,
-                                             hashtag_name=hashtag.name,
-                                             history_length=500,
-                                             job_name=f"populate_{hashtag.name}")
-
-
 def hashtag_delete(request, name):
     deleted = models.Hashtag.delete_if_exists(name)
     if deleted:
-        tasks.run_in_background(tasks.remove_trash_and_sync, "remove_trash_from_view")
+        tasks.run_in_background(
+            tasks.remove_trash_and_sync, "remove_trash_from_view")
     return HttpResponseRedirect(reverse('monitor:index'))
 
 
@@ -74,16 +67,19 @@ def hashtag_create(request):
     if request.method == 'POST':
         form = forms.HashtagForm(request.POST or None)
         if form.is_valid():
-            with transaction.atomic():
-                hashtag = form.save()
-                try:
-                    get_hashtag_tweets(hashtag)
-                except tweepy.RateLimitError:
-                    err = "We reached the Twitter's rate limit. Wait a few minutes and retry..."
-                except tweepy.TweepError:
-                    err = "Something happened on your request. Please retry..."
-                else:
-                    return HttpResponseRedirect(reverse('monitor:index'))
+            hashtag = form.save()
+            twitter_api = twt_utl.get_twitter_api()
+            try:
+                tasks.get_remaining_tweets_in_background(twitter_api=twitter_api,
+                                                         hashtag_name=hashtag.name,
+                                                         history_length=500,
+                                                         job_name=f"populate_{hashtag.name}")
+            except tweepy.RateLimitError:
+                err = "We reached the Twitter's rate limit. Wait a few minutes and retry..."
+            except tweepy.TweepError:
+                err = "Something happened on your request. Please retry..."
+            else:
+                return HttpResponseRedirect(reverse('monitor:index'))
     else:
         form = forms.HashtagForm()
     context = get_default_context(request,
