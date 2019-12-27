@@ -109,15 +109,16 @@ class User(models.Model):
     id = models.BigIntegerField('Twitter user id',
                                 primary_key=True)
     name = models.CharField('Username',
-                            max_length=100,
-                            blank=False,
-                            default=None,
-                            validators=[validate_not_empty])
+                            max_length=500,
+                            blank=True,
+                            null=False,
+                            default="")
 
     screen_name = models.CharField('Username',
-                                   max_length=100, blank=False,
-                                   default=None,
-                                   validators=[validate_not_empty])
+                                   max_length=500,
+                                   blank=True,
+                                   null=False,
+                                   default="")
 
     created_at = models.DateField("Date created", null=False, blank=False)
 

@@ -5,6 +5,7 @@ import pytz
 from django.test import TestCase
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 
 # Create your tests here.
 from ..models import Tweet, User, Hashtag, COLORS_PALETTE
@@ -222,47 +223,37 @@ class UserTests(TestCase):
 
         self.assertEqual(big_int, user.id)
 
-    def test_name_cannot_be_empty(self):
-        with self.assertRaises(ValidationError) as cm:
-            h = User.objects.create(id=123,
+    def test_name_can_be_empty(self):
+        h = User.objects.create(id=123,
                                     name="",
                                     screen_name="Test",
                                     created_at=datetime.datetime.now())
+        self.assertEqual("", h.name)
 
-        msgs = list(cm.exception.message_dict.values())
-        self.assertIn('name', cm.exception.message_dict)
-        self.assertIn('This field cannot be blank.', msgs[0])
 
     def test_name_cannot_be_null(self):
-        with self.assertRaises(ValidationError) as cm:
+        with self.assertRaises(IntegrityError) as cm:
             h = User.objects.create(id=123,
+                                    name=None,
                                     screen_name="Test",
                                     created_at=datetime.datetime.now())
 
-        msgs = list(cm.exception.message_dict.values())
-        self.assertIn('name', cm.exception.message_dict)
-        self.assertIn('This field cannot be null.', msgs[0])
+        self.assertIn('null value in column "name" violates not-null constraint', str(cm.exception))
 
     def test_screen_name_cannot_be_null(self):
-        with self.assertRaises(ValidationError) as cm:
+        with self.assertRaises(IntegrityError) as cm:
             h = User.objects.create(id=123,
                                     name="Test",
+                                    screen_name=None,
                                     created_at=datetime.datetime.now())
+        self.assertIn('null value in column "screen_name" violates not-null constraint', str(cm.exception))
 
-        msgs = list(cm.exception.message_dict.values())
-        self.assertIn('screen_name', cm.exception.message_dict)
-        self.assertIn('This field cannot be null.', msgs[0])
-
-    def test_screen_name_cannot_be_empty(self):
-        with self.assertRaises(ValidationError) as cm:
-            h = User.objects.create(id=123,
+    def test_screen_name_can_be_empty(self):
+        h = User.objects.create(id=123,
                                     screen_name="",
                                     name="Test",
                                     created_at=datetime.datetime.now())
-
-        msgs = list(cm.exception.message_dict.values())
-        self.assertIn('screen_name', cm.exception.message_dict)
-        self.assertIn('This field cannot be blank.', msgs[0])
+        self.assertEqual("", h.screen_name)
 
     def test_created_at_cannot_be_null(self):
         with self.assertRaises(ValidationError) as cm:
